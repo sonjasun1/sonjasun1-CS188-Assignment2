@@ -3,17 +3,16 @@ const uuid = require('uuid');
 const {when} = require('jest-when');
 
 const {initCartControllers} = require('../../controllers/cart-controller');
-const {getAllCarts, getCartByCartId} = require('../../services/cart-service');
-const {getCartsByCustomerId} = require('../../services/cart-service');
+const {getAllCarts, getCartByCartId, getCartsByCustomerId} = require('../../services/cart-service');
 
 jest.mock('../../services/cart-service');
 
 describe('cart controller', () => {
     let fakeServer,
-        expectedCart,
         expectedCartId,
-        expectedCarts,
-        expectedCustomerId;
+        expectedCustomerId,
+        expectedCustomers,
+        expectedCarts;
 
     beforeAll(() => {
         fakeServer = Hapi.server({
@@ -23,9 +22,10 @@ describe('cart controller', () => {
 
         expectedCartId = uuid.v4();
         expectedCart = {
-            cartId: expectedCartId
+            customerId: expectedCartId
         };
         expectedCarts = [expectedCartId, uuid.v4()];
+        expectedCustomers = [uuid.v4()];
 
         getAllCarts.mockReturnValue(expectedCarts);
 
@@ -50,7 +50,19 @@ describe('cart controller', () => {
         expect(response.result).toEqual(expectedCarts);
     });
 
-    it('should return a cart by cartId', async () => {
+    it('should return carts by customerId', async () => {
+        const response = await fakeServer.inject({
+            method: 'GET',
+            url: `/carts/${expectedCustomerId}`
+        });
+
+        expect(getCartsByCustomerId).toHaveBeenCalledWith(expectedCustomerId);
+        expect(getCartsByCustomerId).toHaveBeenCalledTimes(1);
+        expect(response.statusCode).toEqual(200);
+        expect(response.result).toEqual(expectedCarts);
+    });
+
+    it('should return cart by cart id', async () => {
         const response = await fakeServer.inject({
             method: 'GET',
             url: `/carts/${expectedCartId}`
@@ -59,7 +71,7 @@ describe('cart controller', () => {
         expect(getCartByCartId).toHaveBeenCalledWith(expectedCartId);
 
         expect(response.statusCode).toEqual(200);
-        expect(response.result).toEqual(expectedCart);
+        expect(response.result).toEqual(expectedCartId);
     });
 
     it('should return NOT_FOUND if a cart does not exist', async () => {
