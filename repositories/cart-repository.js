@@ -20,30 +20,8 @@ const selectCartsByCustomerId = (customerId) => ({
     rows: carts.filter((cart) => cart['customer_id'] === customerId)
 });
 
-const insertCart = (cart) => carts.push(cart);
-
-const updateCart = (updatedCart) => {
-    const cartsThatDontMatch = carts.filter((cart) =>
-        cart['cart_id'] !== updatedCart['cart_id']
-    );
-
-    carts = [
-        ...cartsThatDontMatch,
-        updatedCart
-    ];
-};
-
-const deleteCartByCartId = (cartId) => {
-    carts = carts.filter((cart) =>
-        cart['cart_id'] !== cartId
-    );
-};
-
 module.exports = {
     selectCartByCartId,
     selectCarts,
-    selectCartsByCustomerId,
-    insertCart,
-    deleteCartByCartId,
-    updateCart
+    selectCartsByCustomerId
 };
