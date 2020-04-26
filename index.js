@@ -1,28 +1,28 @@
-const Hapi = require('@hapi/hapi');
+import Link from 'next/link';
+import fetch from 'isomorphic-unfetch';
 
-const {initCustomerControllers} = require('./controllers/customer-controller');
-const {initCartControllers} = require('./controllers/cart-controller');
-const {initItemControllers} = require('./controllers/item-controller');
-const {initCartItemControllers} = require('./controllers/cart-item-controller');
+const Index = (props) => (
+    <section>
+        <h1>Drake University Apparel</h1>
+        <ul>
+            {props.items.map((item) => (
+                <li key={item.itemId}>
+                    <Link href="/items/[itemId]" as={`/items/${item.itemId}`}>
+                        <a>{item.description}</a>
+                    </Link>
+                </li>
+            ))}
+        </ul>
+    </section>
+);
 
-const init = async () => {
-    const server = Hapi.server({
-        host: 'localhost',
-        port: 3000
-    });
+Index.getInitialProps = async function () {
+    const res = await fetch('http://localhost:5555/items');
+    const items = await res.json();
 
-    initCustomerControllers(server);
-    initCartControllers(server);
-    initItemControllers(server);
-    initCartItemControllers(server);
-
-    await server.start();
-    console.log('Server running on %s', server.info.uri);
+    return {
+        items
+    };
 };
 
-process.on('unhandledRejection', (err) => {
-    console.log(err);
-    process.exit(1);
-});
-
-init();
+export default Index;
